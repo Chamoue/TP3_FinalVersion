@@ -5,6 +5,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -28,8 +29,12 @@ import ca.csf.pobj.tp3.utils.view.KeyPickerDialog;
 public class MainActivity extends AppCompatActivity implements Listener {
 
     private static final int KEY_LENGTH = 5;
-    private static final int MAX_KEY_VALUE = (int) Math.pow(10, KEY_LENGTH) - 1;
-    public static final String CURRENT_KEY = "currentKey";
+    private static final String ID = "id";
+    private static final String OUTPUT_CHARACTERS = "outputCharacters";
+    private static final String INPUT_CHARACTERS = "inputCharacters";
+    private static final String INPUT_TEXT = "inputText";
+    private static final String OUTPUT_TEXT = "outputText";
+    private static final String KEY_TEXT = "keyText";
 
     private View rootView;
     private EditText inputEditText;
@@ -51,25 +56,82 @@ public class MainActivity extends AppCompatActivity implements Listener {
         outputTextView = findViewById(R.id.output_textview);
         currentKeyTextView = findViewById(R.id.current_key_textview);
 
+        setDefaultRandomKey(savedInstanceState);
+        getDefaultCypherKey(savedInstanceState);
+    }
+
+    private void getDefaultCypherKey(Bundle savedInstanceState) {
+        startProgressBar();
+        if (savedInstanceState != null) {
+            if (savedInstanceState.getString(ID).length() > 0
+                    && savedInstanceState.getString(OUTPUT_CHARACTERS).length() > 0
+                    && savedInstanceState.getString(INPUT_CHARACTERS).length() > 0) {
+
+                getOldCypherKey(savedInstanceState);
+
+            } else {
+                getNewCypherKey();
+            }
+
+        } else {
+            getNewCypherKey();
+        }
+    }
+
+    private void getNewCypherKey() {
+        HttpCypherTask httpCypherTask = new HttpCypherTask();
+        httpCypherTask.addListener(this);
+        httpCypherTask.execute(this.currentKeyTextView.getText().toString());
+    }
+
+    private void getOldCypherKey(Bundle savedInstanceState) {
+        this.currentCypher = new Cypher();
+        this.currentCypher.setId(savedInstanceState.getString(ID));
+        this.currentCypher.setOutputCharacters(savedInstanceState.getString(OUTPUT_CHARACTERS));
+        this.currentCypher.setInputCharacters(savedInstanceState.getString(INPUT_CHARACTERS));
+    }
+
+    private void setDefaultRandomKey(Bundle savedInstanceState) {
         if (savedInstanceState == null) {
             Random random = new Random();
             this.currentKeyTextView.setText(Integer.toString(random.nextInt(10000)));
         }
+    }
 
-        getCypherKey();
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        saveData(outState);
+    }
+
+    private void saveData(Bundle outState) {
+        outState.putString(ID, this.currentCypher.getId());
+        outState.putString(OUTPUT_CHARACTERS, this.currentCypher.getOutputCharacters());
+        outState.putString(INPUT_CHARACTERS, this.currentCypher.getInputCharacters());
+        outState.putString(INPUT_TEXT, this.inputEditText.getText().toString());
+        outState.putString(OUTPUT_TEXT, this.outputTextView.getText().toString());
+        outState.putString(KEY_TEXT, this.currentKeyTextView.getText().toString());
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
 
-        if (savedInstanceState.containsKey(CURRENT_KEY)) {
-            this.currentKeyTextView.setText(savedInstanceState.getInt(CURRENT_KEY));
-        }
+        restoreData(savedInstanceState);
+    }
 
-        if (this.currentCypher == null) {
-            getCypherKey();
+    private void restoreData(Bundle savedInstanceState) {
+        if (savedInstanceState != null) {
+            getDefaultCypherKey(savedInstanceState);
+            restoreTextViewData(savedInstanceState);
         }
+    }
+
+    private void restoreTextViewData(Bundle savedInstanceState) {
+        this.inputEditText.setText(savedInstanceState.getString(INPUT_TEXT));
+        this.outputTextView.setText(savedInstanceState.getString(OUTPUT_TEXT));
+        this.currentKeyTextView.setText(savedInstanceState.getString(KEY_TEXT));
     }
 
     private void showKeyPickerDialog(int key) {
@@ -100,13 +162,9 @@ public class MainActivity extends AppCompatActivity implements Listener {
     }
 
     private void fetchSubstitutionCypherKey(int key) {
+        startProgressBar();
         this.currentKeyTextView.setText(Integer.toString(key));
-    }
-
-    private void getCypherKey() {
-        HttpCypherTask httpCypherTask = new HttpCypherTask();
-        httpCypherTask.addListener(this);
-        httpCypherTask.execute(this.currentKeyTextView.getText().toString());
+        getNewCypherKey();
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -129,37 +187,60 @@ public class MainActivity extends AppCompatActivity implements Listener {
     }
 
     public void onDecryptButtonClicked(View view) {
-        CypheringTask cypherTask = new CypheringTask(getString(R.string.task_decrypt), getInputToCypher(), this.currentCypher);
+        startProgressBar();
+        CypheringTask cypherTask = new CypheringTask(false, getInputToCypher(), this.currentCypher);
         cypherTask.addListener(this);
         cypherTask.execute(this.currentKeyTextView.getText().toString());
 
     }
 
     public void onEncryptButtonClicked(View view) {
-        CypheringTask cypherTask = new CypheringTask(getString(R.string.task_crypt), getInputToCypher(), this.currentCypher);
+        startProgressBar();
+        CypheringTask cypherTask = new CypheringTask(true, getInputToCypher(), this.currentCypher);
         cypherTask.addListener(this);
         cypherTask.execute(this.currentKeyTextView.getText().toString());
     }
 
     public String getInputToCypher() {
+
         return this.inputEditText.getText().toString();
     }
 
 
+    private void getCypheringTaskData(String cypherTaskResult) {
+        this.outputTextView.setText(cypherTaskResult);
+    }
+
+    private void getHttpTaskData(CypherRequestResult cypherTaskResult) {
+        this.currentCypherRequest = cypherTaskResult;
+        if (this.currentCypherRequest.isConnnectivityError()) {
+            this.showConnectionError();
+        } else if (this.currentCypherRequest.isServerError()) {
+            this.showServerError();
+        } else if (this.currentCypherRequest.getCypher() != null) {
+            this.currentCypher = new Cypher();
+            this.currentCypher = this.currentCypherRequest.getCypher();
+        }
+    }
+
+    private void startProgressBar() {
+        this.progressBar.setVisibility(View.VISIBLE);
+    }
+
+    private void stopProgressBar() {
+        SystemClock.sleep(500);
+        this.progressBar.setVisibility(View.INVISIBLE);
+    }
+
+    //FAIRE 2 LISTENERS DIFFERANT POUR EVITER LE IF ET LE CAST
     @Override
     public void onCypherTaskEnded(Object cypherTaskResult) {
         if (cypherTaskResult.getClass().getName().equals(CypherRequestResult.class.getName())) {
-            this.currentCypherRequest = (CypherRequestResult) cypherTaskResult;
-            if (this.currentCypherRequest.isConnnectivityError()) {
-                this.showConnectionError();
-            } else if (this.currentCypherRequest.isServerError()) {
-                this.showServerError();
-            } else if (this.currentCypherRequest.getCypher() != null) {
-                this.currentCypher = this.currentCypherRequest.getCypher();
-            }
-
+            getHttpTaskData((CypherRequestResult) cypherTaskResult);
         } else if (cypherTaskResult.getClass().getName().equals(String.class.getName())) {
-            this.outputTextView.setText((String)cypherTaskResult);
+            getCypheringTaskData((String) cypherTaskResult);
         }
+        stopProgressBar();
     }
+
 }

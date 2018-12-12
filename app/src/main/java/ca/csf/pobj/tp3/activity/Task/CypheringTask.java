@@ -12,26 +12,24 @@ import ca.csf.pobj.tp3.activity.Model.Listener;
 
 public class CypheringTask extends AsyncTask<String, Void, String> {
 
-    private static final String CRYPT = "crypt";
-    private static final String DECRYPT = "decrypt";
     private final List<Listener> listeners = new ArrayList<>();
-    private final String taskToDo;
+    private final Boolean taskToDo;
     private final String stringToCypher;
     private Cypher currentCypherKey = new Cypher();
     private String resultString;
 
-    public CypheringTask(String taskToDo, String stringToCypher, Cypher key) {
-        this.taskToDo = taskToDo;
+    public CypheringTask(Boolean isTaskCrypting, String stringToCypher, Cypher key) {
+        this.taskToDo = isTaskCrypting;
         this.stringToCypher = stringToCypher;
-        this.currentCypherKey=key;
+        this.currentCypherKey = key;
     }
 
     @Override
     protected String doInBackground(String... key) {
-        if (this.taskToDo.equals(CRYPT)) {
+        if (this.taskToDo) {
             CryptingCypher cryptingCypher = new CryptingCypher();
             this.resultString = cryptingCypher.cryptString(this.stringToCypher, this.currentCypherKey);
-        } else if (this.taskToDo.equals(DECRYPT)) {
+        } else {
             DecryptingCypher decryptingCypher = new DecryptingCypher();
             this.resultString = decryptingCypher.decryptString(this.stringToCypher, this.currentCypherKey);
         }
@@ -40,7 +38,12 @@ public class CypheringTask extends AsyncTask<String, Void, String> {
 
     @Override
     protected void onPostExecute(String s) {
+
         super.onPostExecute(s);
+
+        for (Listener listener : listeners) {
+            listener.onCypherTaskEnded(s);
+        }
     }
 
     public void addListener(Listener listener) {

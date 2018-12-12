@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Outil de chiffrement</string>
+
+    <string name="hint_input_text">Appuyer ici pour ajouter du texte</string>
+    <string name="text_encrypt">Chiffrer</string>
+    <string name="text_decrypt">Dechiffrer</string>
+    <string name="hint_output_text">Les resultats seront ici</string>
+    <string name="text_current_key">Clef : %05d</string>
+    <string name="text_copy">Copier</string>
+
+    <string name="text_connectivity_error">Pas de connexion internet!</string>
+    <string name="text_server_error">Le serveur est en maintenance. Essayez plus tard.</string>
+    <string name="text_copied_output">Message copie!</string>
+    <string name="nothing_to_copy">Rien a copie!</string>
+
+    <string name="text_activate_wifi">Activer le wifi!</string>
+
+    <string name="clipboard_encrypted_text">Texte chiffre</string>
+</resources>

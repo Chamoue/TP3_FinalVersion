@@ -34,11 +34,11 @@ public class HttpRequestCypherKey {
                 return CypherRequestResult.requestCompleted(currentCypher);
             } else {
 
-               return CypherRequestResult.servorError();
+                return CypherRequestResult.servorError();
             }
 
         } catch (IOException e) {
-           return CypherRequestResult.connectivityError();
+            return CypherRequestResult.connectivityError();
         }
     }
 }

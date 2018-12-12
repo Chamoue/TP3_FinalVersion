@@ -1,7 +1,5 @@
 package ca.csf.pobj.tp3.activity.Model;
 
-import ca.csf.pobj.tp3.activity.Model.Cypher;
-
 public class CryptingCypher {
 
     public String cryptString(String stringToCrypt, Cypher cypherKey) {

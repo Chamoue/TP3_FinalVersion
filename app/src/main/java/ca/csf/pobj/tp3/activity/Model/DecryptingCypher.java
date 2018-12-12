@@ -1,7 +1,5 @@
 package ca.csf.pobj.tp3.activity.Model;
 
-import ca.csf.pobj.tp3.activity.Model.Cypher;
-
 public class DecryptingCypher {
     public String decryptString(String stringToDecrypt, Cypher cypherKey) {
         StringBuilder stringBuilder = new StringBuilder();

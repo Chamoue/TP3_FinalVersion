@@ -7,8 +7,6 @@
     <string name="hint_output_text">Result will be shown here</string>
     <string name="text_current_key">Key : %05d</string>
     <string name="text_copy">Copy</string>
-    <string name="task_crypt">crypt</string>
-    <string name="task_decrypt">decrypt</string>
 
     <string name="text_connectivity_error">You are not connected to the internet.</string>
     <string name="text_server_error">Server is in maintenance. Please try again later.</string>

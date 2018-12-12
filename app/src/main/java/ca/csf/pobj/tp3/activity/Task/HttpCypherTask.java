@@ -9,7 +9,7 @@ import ca.csf.pobj.tp3.activity.Model.CypherRequestResult;
 import ca.csf.pobj.tp3.activity.Model.HttpRequestCypherKey;
 import ca.csf.pobj.tp3.activity.Model.Listener;
 
-public class HttpCypherTask extends AsyncTask<String,Void,CypherRequestResult> {
+public class HttpCypherTask extends AsyncTask<String, Void, CypherRequestResult> {
 
     private final List<Listener> listeners = new ArrayList<>();
 
