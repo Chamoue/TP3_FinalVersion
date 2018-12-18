@@ -20,13 +20,14 @@ import java.util.Random;
 import ca.csf.pobj.tp3.R;
 import ca.csf.pobj.tp3.activity.Model.Cypher;
 import ca.csf.pobj.tp3.activity.Model.CypherRequestResult;
+import ca.csf.pobj.tp3.activity.Model.CypherTaskListener;
 import ca.csf.pobj.tp3.activity.Task.CypheringTask;
-import ca.csf.pobj.tp3.activity.Model.Listener;
+import ca.csf.pobj.tp3.activity.Model.HttpRequestListener;
 import ca.csf.pobj.tp3.activity.Task.HttpCypherTask;
 import ca.csf.pobj.tp3.utils.view.CharactersFilter;
 import ca.csf.pobj.tp3.utils.view.KeyPickerDialog;
 
-public class MainActivity extends AppCompatActivity implements Listener {
+public class MainActivity extends AppCompatActivity implements HttpRequestListener, CypherTaskListener {
 
     private static final int KEY_LENGTH = 5;
     private static final String ID = "id";
@@ -61,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements Listener {
     }
 
     private void getDefaultCypherKey(Bundle savedInstanceState) {
-        startProgressBar();
+
         if (savedInstanceState != null) {
             if (savedInstanceState.getString(ID).length() > 0
                     && savedInstanceState.getString(OUTPUT_CHARACTERS).length() > 0
@@ -79,6 +80,7 @@ public class MainActivity extends AppCompatActivity implements Listener {
     }
 
     private void getNewCypherKey() {
+        startProgressBar();
         HttpCypherTask httpCypherTask = new HttpCypherTask();
         httpCypherTask.addListener(this);
         httpCypherTask.execute(this.currentKeyTextView.getText().toString());
@@ -232,15 +234,15 @@ public class MainActivity extends AppCompatActivity implements Listener {
         this.progressBar.setVisibility(View.INVISIBLE);
     }
 
-    //FAIRE 2 LISTENERS DIFFERANT POUR EVITER LE IF ET LE CAST
     @Override
-    public void onCypherTaskEnded(Object cypherTaskResult) {
-        if (cypherTaskResult.getClass().getName().equals(CypherRequestResult.class.getName())) {
-            getHttpTaskData((CypherRequestResult) cypherTaskResult);
-        } else if (cypherTaskResult.getClass().getName().equals(String.class.getName())) {
-            getCypheringTaskData((String) cypherTaskResult);
-        }
+    public void onHttpRequestDone(CypherRequestResult cypherRequestResult) {
+        getHttpTaskData(cypherRequestResult);
         stopProgressBar();
     }
 
+    @Override
+    public void onCypherTaskDone(String result) {
+        getCypheringTaskData(result);
+        stopProgressBar();
+    }
 }

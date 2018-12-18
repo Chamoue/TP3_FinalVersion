@@ -7,12 +7,13 @@ import java.util.List;
 
 import ca.csf.pobj.tp3.activity.Model.CryptingCypher;
 import ca.csf.pobj.tp3.activity.Model.Cypher;
+import ca.csf.pobj.tp3.activity.Model.CypherTaskListener;
 import ca.csf.pobj.tp3.activity.Model.DecryptingCypher;
-import ca.csf.pobj.tp3.activity.Model.Listener;
+
 
 public class CypheringTask extends AsyncTask<String, Void, String> {
 
-    private final List<Listener> listeners = new ArrayList<>();
+    private final List<CypherTaskListener> listeners = new ArrayList<>();
     private final Boolean taskToDo;
     private final String stringToCypher;
     private Cypher currentCypherKey = new Cypher();
@@ -41,12 +42,12 @@ public class CypheringTask extends AsyncTask<String, Void, String> {
 
         super.onPostExecute(s);
 
-        for (Listener listener : listeners) {
-            listener.onCypherTaskEnded(s);
+        for (CypherTaskListener listener : listeners) {
+            listener.onCypherTaskDone(s);
         }
     }
 
-    public void addListener(Listener listener) {
+    public void addListener(CypherTaskListener listener) {
 
         this.listeners.add(listener);
     }

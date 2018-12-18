@@ -7,11 +7,11 @@ import java.util.List;
 
 import ca.csf.pobj.tp3.activity.Model.CypherRequestResult;
 import ca.csf.pobj.tp3.activity.Model.HttpRequestCypherKey;
-import ca.csf.pobj.tp3.activity.Model.Listener;
+import ca.csf.pobj.tp3.activity.Model.HttpRequestListener;
 
 public class HttpCypherTask extends AsyncTask<String, Void, CypherRequestResult> {
 
-    private final List<Listener> listeners = new ArrayList<>();
+    private final List<HttpRequestListener> listeners = new ArrayList<>();
 
     @Override
     protected CypherRequestResult doInBackground(String... key) {
@@ -23,12 +23,12 @@ public class HttpCypherTask extends AsyncTask<String, Void, CypherRequestResult>
     protected void onPostExecute(CypherRequestResult cypherRequestResult) {
         super.onPostExecute(cypherRequestResult);
 
-        for (Listener listener : listeners) {
-            listener.onCypherTaskEnded(cypherRequestResult);
+        for (HttpRequestListener listener : listeners) {
+            listener.onHttpRequestDone(cypherRequestResult);
         }
     }
 
-    public void addListener(Listener listener) {
+    public void addListener(HttpRequestListener listener) {
 
         this.listeners.add(listener);
     }
