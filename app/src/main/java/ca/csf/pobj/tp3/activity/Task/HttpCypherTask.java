@@ -29,7 +29,6 @@ public class HttpCypherTask extends AsyncTask<String, Void, CypherRequestResult>
     }
 
     public void addListener(HttpRequestListener listener) {
-
         this.listeners.add(listener);
     }
 }
