@@ -1,5 +1,8 @@
 package ca.csf.pobj.tp3.activity.Model;
 
+//BEN_REVIEW : Je vois mal pourquoi vous avez séparé "CryptingCypher" et
+//             "DecryptingCypher".
+//BEN_CORRECTION : Duplication de code avec "DecryptingCypher".
 public class CryptingCypher {
 
     public String cryptString(String stringToCrypt, Cypher cypherKey) {

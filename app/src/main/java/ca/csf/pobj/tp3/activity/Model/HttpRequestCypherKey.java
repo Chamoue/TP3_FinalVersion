@@ -12,6 +12,7 @@ import okhttp3.Response;
 
 public class HttpRequestCypherKey {
 
+    //BEN_REVIEW : Aurait pu être private.
     public static final String URL = "https://m1t2.csfpwmjv.tk/api/key/%d";
 
 

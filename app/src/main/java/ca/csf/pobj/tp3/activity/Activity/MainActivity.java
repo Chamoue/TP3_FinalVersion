@@ -29,6 +29,7 @@ import ca.csf.pobj.tp3.utils.view.KeyPickerDialog;
 
 public class MainActivity extends AppCompatActivity implements HttpRequestListener, CypherTaskListener {
 
+    //BEN_REVIEW : Spéaration en 2 blocs des constantes et des attributs. Bien! Lisible.
     private static final int KEY_LENGTH = 5;
     private static final String ID = "id";
     private static final String OUTPUT_CHARACTERS = "outputCharacters";
@@ -42,7 +43,7 @@ public class MainActivity extends AppCompatActivity implements HttpRequestListen
     private TextView outputTextView;
     private TextView currentKeyTextView;
     private ProgressBar progressBar;
-    private CypherRequestResult currentCypherRequest;
+    private CypherRequestResult currentCypherRequest; //BEN_REVIEW : Lire le "warning".
     private Cypher currentCypher;
 
     @Override
@@ -57,13 +58,20 @@ public class MainActivity extends AppCompatActivity implements HttpRequestListen
         outputTextView = findViewById(R.id.output_textview);
         currentKeyTextView = findViewById(R.id.current_key_textview);
 
+        //BEN_REVIEW : La logique derrière ces deux méthodes me semble très complexe pour pas
+        //             grand chose.
+        //BEN_CORRECTION : La logique dans "setDefaultRandomKey" aurait dû, à mon avis,
+        //                 être dans "getDefaultCypherKey" (voir même dans "getNewCypherKey"
+        //                 avec quelques modifications).
         setDefaultRandomKey(savedInstanceState);
         getDefaultCypherKey(savedInstanceState);
     }
 
+    //BEN_REVIEW : Nommage à revoir. Pourquoi pas "initOrRestoreState" ou quelque chose du genre ?
     private void getDefaultCypherKey(Bundle savedInstanceState) {
 
         if (savedInstanceState != null) {
+            //BEN_REVIEW : Utilisez "containsKey" à la place. Moins de risques d'un "Null".
             if (savedInstanceState.getString(ID).length() > 0
                     && savedInstanceState.getString(OUTPUT_CHARACTERS).length() > 0
                     && savedInstanceState.getString(INPUT_CHARACTERS).length() > 0) {
@@ -83,9 +91,12 @@ public class MainActivity extends AppCompatActivity implements HttpRequestListen
         startProgressBar();
         HttpCypherTask httpCypherTask = new HttpCypherTask();
         httpCypherTask.addListener(this);
+        //BEN_CORRECTION : Mauvaise idée. Il aurait été mieux de conserver le numéro de la clé
+        //                 en tant qu'entier dans un attribut de "MainActvity".
         httpCypherTask.execute(this.currentKeyTextView.getText().toString());
     }
 
+    //BEN_REVIEW : Bonne idée d'avoir mis ça dans sa propre fonction.
     private void getOldCypherKey(Bundle savedInstanceState) {
         this.currentCypher = new Cypher();
         this.currentCypher.setId(savedInstanceState.getString(ID));
@@ -93,6 +104,7 @@ public class MainActivity extends AppCompatActivity implements HttpRequestListen
         this.currentCypher.setInputCharacters(savedInstanceState.getString(INPUT_CHARACTERS));
     }
 
+    //BEN_REVIEW : Nommage à revoir.
     private void setDefaultRandomKey(Bundle savedInstanceState) {
         if (savedInstanceState == null) {
             Random random = new Random();
@@ -116,6 +128,9 @@ public class MainActivity extends AppCompatActivity implements HttpRequestListen
         outState.putString(KEY_TEXT, this.currentKeyTextView.getText().toString());
     }
 
+    //BEN_REVIEW : J'ai tendance à dire d'effectuer la restoration des données soit totalement dans
+    //             "onCreate", soit totalement dans "onRestoreInstanceState", mais pas les deux en
+    //             même temps.
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
@@ -124,7 +139,7 @@ public class MainActivity extends AppCompatActivity implements HttpRequestListen
     }
 
     private void restoreData(Bundle savedInstanceState) {
-        if (savedInstanceState != null) {
+        if (savedInstanceState != null) { //BEN_REVIEW : Toujours vrai.
             getDefaultCypherKey(savedInstanceState);
             restoreTextViewData(savedInstanceState);
         }
@@ -166,7 +181,7 @@ public class MainActivity extends AppCompatActivity implements HttpRequestListen
     private void fetchSubstitutionCypherKey(int key) {
         startProgressBar();
         this.currentKeyTextView.setText(Integer.toString(key));
-        getNewCypherKey();
+        getNewCypherKey(); //BEN_REVIEW : getNewCypherKey aurait pu recevoir en paraêtre le numéro de la clé à obtenir.
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -176,6 +191,8 @@ public class MainActivity extends AppCompatActivity implements HttpRequestListen
     }
 
     public void onKeySelectButtonClicked(View view) {
+        //BEN_CORRECTION : Mauvaise idée. Il aurait été mieux de conserver le numéro de la clé
+        //                 en tant qu'entier dans un attribut de "MainActvity".
         showKeyPickerDialog(Integer.parseInt(this.currentKeyTextView.getText().toString()));
     }
 
@@ -208,7 +225,7 @@ public class MainActivity extends AppCompatActivity implements HttpRequestListen
         return this.inputEditText.getText().toString();
     }
 
-
+    //BEN_CORRECTION : Nommage mensonger. C'est plutôt un set.
     private void getCypheringTaskData(String cypherTaskResult) {
         this.outputTextView.setText(cypherTaskResult);
     }
@@ -220,7 +237,7 @@ public class MainActivity extends AppCompatActivity implements HttpRequestListen
         } else if (this.currentCypherRequest.isServerError()) {
             this.showServerError();
         } else if (this.currentCypherRequest.getCypher() != null) {
-            this.currentCypher = new Cypher();
+            this.currentCypher = new Cypher(); //BEN_CORRECTION : "new" inutile, car écrasé par après. Erreur de logique.
             this.currentCypher = this.currentCypherRequest.getCypher();
         }
     }
@@ -230,7 +247,7 @@ public class MainActivity extends AppCompatActivity implements HttpRequestListen
     }
 
     private void stopProgressBar() {
-        SystemClock.sleep(500);
+        SystemClock.sleep(500);//BEN_CORRETION : Fige le "MainThread" durant 500ms.
         this.progressBar.setVisibility(View.INVISIBLE);
     }
 

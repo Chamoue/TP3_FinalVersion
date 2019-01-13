@@ -14,9 +14,9 @@ import ca.csf.pobj.tp3.activity.Model.DecryptingCypher;
 public class CypheringTask extends AsyncTask<String, Void, String> {
 
     private final List<CypherTaskListener> listeners = new ArrayList<>();
-    private final Boolean taskToDo;
+    private final Boolean taskToDo; //BEN_CORRECTION : Nommage imprécis. isTaskCrypting ?
     private final String stringToCypher;
-    private Cypher currentCypherKey = new Cypher();
+    private Cypher currentCypherKey = new Cypher(); //BEN_CORRECTION : Instanciation inutile. Erreur de logique (séquence des opérations).
     private String resultString;
 
     public CypheringTask(Boolean isTaskCrypting, String stringToCypher, Cypher key) {

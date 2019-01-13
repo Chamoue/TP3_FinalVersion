@@ -4,6 +4,7 @@ public final class CypherRequestResult<T> {
 
     private Cypher cypher;
     private boolean isServerError;
+    //BEN_REVIEW : Typo : isConnnectivityError => isConnectivityError
     private boolean isConnnectivityError;
 
     private CypherRequestResult(Cypher cypher, boolean isServerError, boolean isConnnectivityError) {
@@ -16,6 +17,7 @@ public final class CypherRequestResult<T> {
         return new CypherRequestResult<>(cypher, false, false);
     }
 
+    //BEN_REVIEW : Typo : servorError => serverError
     public static <T> CypherRequestResult<T> servorError() {
         return new CypherRequestResult<>(null, true, false);
     }
